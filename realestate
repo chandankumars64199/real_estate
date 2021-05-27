@@ -1,0 +1,183 @@
+import pandas as pd 
+import numpy as np
+import seaborn as sns
+from pandas.plotting import scatter_matrix
+from sklearn import preprocessing
+import matplotlib.pyplot as plt
+
+
+#%%
+
+data=pd.read_csv("/content/USA_Housing.csv")
+
+#%% md
+
+**1.EXPLORATORY DATA ANALYSIS AND DATA VISUALIZATION**
+
+#%% md
+
+**Initial appearance of the dataset**
+
+
+
+
+
+#%%
+
+data
+
+
+#%% md
+
+Since we do not know the relation between address and target price ,we will encode it to a integer and check the correlation later on .If they do not correlate the we will drop it later on  
+
+#%%
+
+labelEncoder= preprocessing.LabelEncoder()
+data['Address']=labelEncoder.fit_transform(data['Address'].unique())
+len(data['Address'].unique())
+
+#%% md
+
+**The data set does'nt have any null values as shown below**
+
+#%%
+
+data.info()
+
+#%% md
+
+**Visualizing the data using pandas plot**
+
+#%%
+
+scatter_matrix(data,figsize=(20,20),grid=True)
+
+#%% md
+
+**Examining the correlation between the dataset features**
+
+#%%
+
+data.corr()
+
+#%% md
+
+**Heatmap depicting the correlation**
+
+#%%
+
+
+sns.heatmap(data.corr(),annot=True,cmap='coolwarm')
+
+#%% md
+
+**Clearly we can see that the address feature inclulded here is not showing proper relation with the features nor the target function .Hence we drop it**
+
+#%% md
+
+**2.Data PreProcessing**
+
+#%%
+
+data.drop(['Address'],axis=1,inplace=True)
+
+#%%
+
+data.head()
+
+#%% md
+
+**3.Data cleaning** 
+Luckily the data does'nt have any null values or even missing values 
+
+#%% md
+
+**4.Train test split** : using sklearn preprocessing module 
+
+#%%
+
+from sklearn.model_selection import train_test_split
+
+#%%
+
+x=data.drop("Price",axis=1)
+y=data['Price']
+
+#%%
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.33,random_state=56)
+
+#%%
+
+print("shape of the data after splitting ")
+print(x_train.shape)
+print(y_train.shape)
+print(x_test.shape)
+print(y_test.shape)
+
+#%% md
+
+**5.Algorithm Selection**
+
+The problem is a multivariate linear regression .The target function Price of the house is a continuous geometrically.Hence we try to use the sklearn linear regression model. 
+
+#%%
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+#%%
+
+model = LinearRegression()
+
+#%% md
+
+**6.Training and testing**
+
+#%% md
+
+-Training 
+
+#%%
+
+model.fit(x_train,y_train)
+
+#%% md
+
+-Testing
+
+#%%
+
+print("Training accuracy :",model.score(x_train,y_train)*100,"%")
+
+#%%
+
+print("Testing accuracy :",model.score(x_test,y_test)*100,"%")
+
+#%%
+
+y_pred=model.predict(x_test)
+# The coefficient of determination: 1 is perfect prediction
+print('Coefficient of determination: %.2f'
+      % r2_score(y_test, y_pred))
+
+
+#%% md
+
+**The closeness of the training and testing accuracy imply that the model is not overfitted**
+
+
+Also the Coefficient of determination close to 1 indicating the quality of the prediction .
+
+#%% md
+
+**7.Conclusion and observation**
+
+From the above conducted training and testing it is observed that the the data fits well into the model producing a 90 odd %.In other words if features such as 
+Average area income ,
+Average house age ,
+Average area no. of rooms,
+Average area no. of bedrooms,
+Average area population is given then the price of such a house can predicted .
+
